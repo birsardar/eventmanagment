@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\EventController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -17,14 +17,13 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-use App\Http\Controllers\EventController;
 
-Route::get('/events', [EventController::class, 'index']);            // GET all events
-Route::get('/events/{id}', [EventController::class, 'show']);        // GET single event by ID
-Route::post('/events', [EventController::class, 'store']);           // POST create new event
-Route::put('/events/{id}', [EventController::class, 'update']);      // PUT update event by ID
-Route::delete('/events/{id}', [EventController::class, 'destroy']);  // DELETE event by ID
-
-Auth::routes();
+Route::view('/login', 'auth.login')->name('login');
+Route::view('/register', 'auth.register')->name('register');
+Route::view('/dashboard', 'dashboard')->name('dashboard');
+Route::view('/events', 'event.index')->name('events');
+Route::view('/events/create', 'event.create')->name('events.create');
+Route::view('/events/edit', 'event.edit')->name('events.edit');
+Route::view('/events/show', 'event.show')->name('events.show');
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

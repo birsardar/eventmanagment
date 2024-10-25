@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Event;
+use App\Models\Category;
 
 class EventController extends Controller
 {
@@ -12,27 +13,40 @@ class EventController extends Controller
      */
     public function index()
     {
-        $event = Event::with('category')->get();
-        if ($event->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No events found'
-            ], 404);
-        } else {
+        try {
+            // Fetch events with category
+            $events = Event::with('category')->get();
+
+            if ($events->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No events found'
+                ], 404);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Events retrieved successfully',
-                'data' => $event
+                'data' => $events
             ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while retrieving events',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
+
+
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        //
+        // $categories  = Category::all();
+        // return view('event.create', compact('categories'));
     }
 
     /**
