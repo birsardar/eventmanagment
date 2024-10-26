@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\AttendeeController;
+use App\Http\Controllers\Api\AuthController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -26,6 +28,7 @@ Route::post('/auth/login', [UserController::class, 'loginUser'])->name('auth.log
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/auth/logout', [AuthController::class, 'logoutUser'])->name('auth.logout');
     Route::apiResource('events', EventController::class);
     Route::get('/events', [EventController::class, 'index']);            // GET all events
     Route::get('/events/{id}', [EventController::class, 'show']);        // GET single event by ID

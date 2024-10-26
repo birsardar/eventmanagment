@@ -25,8 +25,19 @@
 
 <body>
     <div class="container-fluid p-3 bg-dark text-white text-center">
-        <h1>Dashboard</h1>
+        <div class="d-flex justify-content-between align-items-center">
+            <!-- Logout Form -->
+            <form action="{{ route('logout') }}" method="POST" class="ms-3">
+                @csrf
+                <button type="submit" class="btn btn-danger">Logout</button>
+            </form>
+
+            <!-- Dashboard Title -->
+            <h1 class="flex-grow-1 text-center m-0">Dashboard</h1>
+        </div>
     </div>
+
+
 
     <div class="container my-5">
         <div class="row g-4 justify-content-center">
@@ -48,8 +59,6 @@
                     <h3><a href="{{ route('attendee.index') }}">Attendee</a></h3>
                 </div>
             </div>
-
-
         </div>
     </div>
 
