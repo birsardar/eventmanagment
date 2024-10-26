@@ -12,11 +12,13 @@ class Event extends Model
 {
     use HasFactory;
     protected $fillable = ['title', 'description', 'date', 'location', 'category_id'];
+    protected $cast = ['date' => 'datetime'];
 
     public function attendees()
     {
-        return $this->hasMany(Attendee::class);
+        return $this->belongsToMany(Attendee::class, 'event_attendee');
     }
+
 
     public function category()
     {

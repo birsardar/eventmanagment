@@ -31,16 +31,27 @@
                 <label for="location" class="form-label">Location</label>
                 <input type="text" id="location" name="location" class="form-control" required>
             </div>
-            {{-- <div class="mb-3">
+            <div class="mb-3">
                 <label for="category_id" class="form-label">Category</label>
                 <select id="category_id" name="category_id" class="form-control" required>
                     @foreach ($categories as $category)
                         <option value="{{ $category->id }}">{{ $category->name }}</option>
                     @endforeach
-                </select> --}}
-    </div>
-    <button type="submit" class="btn btn-primary">Create Event</button>
-    </form>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="attendee_id" class="form-label">Attendees</label>
+                <select id="attendee_id" name="attendee_id[]" class="form-control" multiple>
+                    @foreach ($attendees as $attendee)
+                        <option value="{{ $attendee->id }}">{{ $attendee->name }}</option>
+                    @endforeach
+                </select>
+                <small class="form-text text-muted">Hold down the Ctrl (Windows) or Command (Mac) key to select multiple
+                    attendees.</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create Event</button>
+        </form>
     </div>
 </body>
 

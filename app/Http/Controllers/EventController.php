@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Category;
+use App\Models\Attendee;
 
 class EventController extends Controller
 {
@@ -13,29 +14,8 @@ class EventController extends Controller
      */
     public function index()
     {
-        try {
-            // Fetch events with category
-            $events = Event::with('category')->get();
-
-            if ($events->isEmpty()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No events found'
-                ], 404);
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Events retrieved successfully',
-                'data' => $events
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while retrieving events',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        $events = Event::all();
+        return view('event.index', compact('events'));
     }
 
 
@@ -45,8 +25,9 @@ class EventController extends Controller
      */
     public function create()
     {
-        // $categories  = Category::all();
-        // return view('event.create', compact('categories'));
+        $categories = Category::all();
+        $attendees = Attendee::all();
+        return view('event.create', compact('categories', 'attendees'));
     }
 
     /**
@@ -55,27 +36,32 @@ class EventController extends Controller
     public function store(Request $request)
     {
 
-        $validated = $request->validate([
+        $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'date' => 'required|date',
             'location' => 'required|string',
-            'category_id' => 'required|exists:categories,id'
+            'category_id' => 'required|exists:categories,id',
+            // 'attendee_id' => 'required|array', // Ensure it's an array
+            // 'attendee_id.*' => 'exists:attendees,id', // Validate each ID in the array
         ]);
 
-        $event = Event::create($validated);
-        if ($event) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Event created successfully',
-                'data' => $event
-            ], 201);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Event could not be created'
-            ], 500);
+        // Create the event
+        $event = Event::create([
+            'title' => $validatedData['title'],
+            'description' => $validatedData['description'],
+            'date' => $validatedData['date'],
+            'location' => $validatedData['location'],
+            'category_id' => $validatedData['category_id'],
+        ]);
+
+        // Attach the attendees if attendee_id is provided
+        if (isset($validatedData['attendee_id'])) {
+            $event->attendees()->attach($validatedData['attendee_id']);
         }
+
+
+        return redirect()->route('events.index')->with('success', 'Event created successfully with attendees.');
     }
 
     /**
@@ -83,20 +69,10 @@ class EventController extends Controller
      */
     public function show(string $id)
     {
-        $event = Event::with('category')->find($id);
-
-        if (!$event) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Event not found'
-            ], 404);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Event retrieved successfully',
-            'data' => $event
-        ], 200);
+        $event = Event::find($id);
+        $attendees = $event->attendees;
+        // dd($attendees);
+        return view('event.show', compact('event', 'attendees'));
     }
 
     /**
@@ -104,7 +80,10 @@ class EventController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $event = Event::find($id);
+        $categories = Category::all();
+        $attendees = Attendee::all();
+        return view('event.edit', compact('event', 'categories', 'attendees'));
     }
 
     /**
@@ -112,27 +91,27 @@ class EventController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $event = Event::findOrFail($id);
-
-        $validated = $request->validate([
-            'title' => 'string|max:255',
-            'description' => 'string',
-            'date' => 'date',
-            'location' => 'string',
-            'category_id' => 'exists:categories,id'
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'date' => 'required|date',
+            'location' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'attendee_id' => 'array',  // Validate as an array
+            'attendee_id.*' => 'exists:attendees,id' // Validate each ID in the array
         ]);
-        if ($event->update($validated)) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Event updated successfully',
-                'data' => $event
-            ], 200);
+
+        $event = Event::findOrFail($id);
+        $event->update($validatedData);
+
+        // Sync attendees with the event if attendee_id is provided
+        if (isset($validatedData['attendee_id'])) {
+            $event->attendees()->sync($validatedData['attendee_id']);
         } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Event could not be updated'
-            ], 500);
+            $event->attendees()->sync([]);
         }
+
+        return redirect()->route('events.index')->with('success', 'Event updated successfully with attendees.');
     }
 
     /**
@@ -140,18 +119,9 @@ class EventController extends Controller
      */
     public function destroy(string $id)
     {
-        $event = Event::findOrFail($id);
-
-        if ($event->delete()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Event deleted successfully'
-            ], 200);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Event could not be deleted'
-            ], 500);
-        }
+        $event = Event::find($id);
+        $event->attendees()->detach();
+        $event->delete();
+        return redirect()->route('events.index')->with('success', 'Event deleted successfully with attendees.');
     }
 }

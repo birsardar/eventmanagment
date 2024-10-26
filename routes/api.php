@@ -2,8 +2,10 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\EventController;
+use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\AttendeeController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -30,4 +32,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/events', [EventController::class, 'store'])->name('events.store');           // POST create new event
     Route::put('/events/{id}', [EventController::class, 'update']);      // PUT update event by ID
     Route::delete('/events/{id}', [EventController::class, 'destroy']);  // DELETE event by ID
+    Route::apiResource('categories', CategoryController::class);
+    Route::get('/categories', [CategoryController::class, 'index']);       // GET all categories
+    Route::get('/categories/{id}', [CategoryController::class, 'show']);   // GET single category by ID
+    Route::post('/categories', [CategoryController::class, 'store']);      // POST create new category
+    Route::put('/categories/{id}', [CategoryController::class, 'update']); // PUT update category by ID
+    Route::delete('/categories/{id}', [CategoryController::class, 'destroy']); // DELETE category by ID
+    Route::apiResource('attendees', AttendeeController::class);
+    Route::get('/attendees', [AttendeeController::class, 'index']);       // GET all attendees
+    Route::get('/attendees/{id}', [AttendeeController::class, 'show']);   // GET single attendee by ID
+    Route::post('/attendees', [AttendeeController::class, 'store']);      // POST create new attendee
+    Route::put('/attendees/{id}', [AttendeeController::class, 'update']); // PUT update attendee by ID
+    Route::delete('/attendees/{id}', [AttendeeController::class, 'destroy']); // DELETE attendee by ID
 });

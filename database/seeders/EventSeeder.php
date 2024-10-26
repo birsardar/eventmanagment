@@ -22,7 +22,7 @@ class EventSeeder extends Seeder
                 'description' => 'A Laravel conference event',
                 'date' => '2024-12-10',
                 'location' => 'Kathmandu',
-                'category' => $categories->first(),
+                'category' => $categories->first(), // Default category for testing
                 'attendees' => [
                     ['name' => 'John Doe', 'email' => 'john@example.com'],
                     ['name' => 'Jane Doe', 'email' => 'jane@example.com'],
@@ -35,7 +35,7 @@ class EventSeeder extends Seeder
                 'date' => '2024-12-15',
                 'location' => 'Pokhara',
                 'category' => $categories->where('name', 'Workshop')->first(),
-                'attendees' => [],
+                'attendees' => [['name' => 'John Doe', 'email' => 'john@example.com']],
                 'user_id' => '1',
             ],
             [
@@ -44,44 +44,29 @@ class EventSeeder extends Seeder
                 'date' => '2024-12-20',
                 'location' => 'Biratnagar',
                 'category' => $categories->where('name', 'Seminar')->first(),
-                'attendees' => [],
+                'attendees' => [['name' => 'John Doe', 'email' => 'john@example.com']],
                 'user_id' => '1',
             ],
-            [
-                'title' => 'Angular Meetup',
-                'description' => 'An Angular meetup event',
-                'date' => '2024-12-25',
-                'location' => 'Chitwan',
-                'category' => $categories->where('name', 'Workshop')->first(),
-                'attendees' => [],
-                'user_id' => '1',
-            ],
-            [
-                'title' => 'Node.js Hackathon',
-                'description' => 'A Node.js hackathon event',
-                'date' => '2024-12-30',
-                'location' => 'Butwal',
-                'category' => $categories->where('name', 'Workshop')->first(),
-                'attendees' => [
-                    [
-                        'name' => 'John Doe',
-                        'email' => 'jhone@gmail.com',
-                    ],
-                ],
-            ],
-
+            // ... other events
         ];
 
         foreach ($events as $eventData) {
+            // Skip if category is missing
+            if (empty($eventData['category'])) {
+                echo "Category for event '{$eventData['title']}' not found. Skipping.\n";
+                continue;
+            }
+
+            // Create the event
             $event = Event::create([
                 'title' => $eventData['title'],
                 'description' => $eventData['description'],
                 'date' => $eventData['date'],
                 'location' => $eventData['location'],
                 'category_id' => $eventData['category']->id,
-
             ]);
 
+            // Create attendees if any
             if (!empty($eventData['attendees'])) {
                 $event->attendees()->createMany($eventData['attendees']);
             }

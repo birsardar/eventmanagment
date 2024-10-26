@@ -26,62 +26,27 @@
                 </tr>
             </thead>
             <tbody id="events-table-body">
-                <!-- Event rows will be populated by JavaScript -->
+                @foreach ($events as $event)
+                    <tr>
+                        <td>{{ $event->title }}</td>
+                        <td>{{ $event->description }}</td>
+                        <td>{{ $event->date }}</td>
+                        <td>{{ $event->location }}</td>
+                        <td>
+                            <a href="{{ route('events.show', $event->id) }}" class="btn btn-info">View</a>
+                            <a href="{{ route('events.edit', $event->id) }}" class="btn btn-warning">Edit</a>
+                            <form action="{{ route('events.destroy', $event->id) }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                @endforeach
             </tbody>
         </table>
+        <a href="{{ route('home') }}" class="btn btn-primary mt-3">HOME</a>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script>
-        async function loadEvents() {
-            try {
-                const response = await axios.get('/api/events', {
-                    headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
-                    }
-                });
-
-                const eventsTableBody = document.getElementById('events-table-body');
-                eventsTableBody.innerHTML = '';
-
-                response.data.data.forEach(event => {
-                    const row = `<tr>
-                                <td>${event.title}</td>
-                                <td>${event.description}</td>
-                                <td>${event.date}</td>
-                                <td>${event.location}</td>
-                                <td>
-                                    <a href="/event/${event.id}" class="btn btn-info btn-sm">View</a>
-                                    <a href="/event/${event.id}/edit" class="btn btn-warning btn-sm">Edit</a>
-                                    <button onclick="deleteEvent(${event.id})" class="btn btn-danger btn-sm">Delete</button>
-                                </td>
-                             </tr>`;
-                    eventsTableBody.innerHTML += row;
-                });
-            } catch (error) {
-                console.error('Error loading events:', error);
-            }
-        }
-
-        async function deleteEvent(id) {
-            if (confirm('Are you sure you want to delete this event?')) {
-                try {
-                    await axios.delete(`/api/events/${id}`, {
-                        headers: {
-                            'Authorization': 'Bearer ' + localStorage.getItem('auth_token')
-                        }
-                    });
-                    alert('Event deleted successfully');
-                    loadEvents(); // Reload events
-                } catch (error) {
-                    console.error('Error deleting event:', error);
-                }
-            }
-        }
-
-        // Load events when the page loads
-        loadEvents();
-    </script>
 </body>
 
 </html>
